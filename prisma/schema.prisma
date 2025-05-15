@@ -1,0 +1,109 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Igreja {
+  id           Int       @id @default(autoincrement())
+  nome         String
+  endereco     String?
+  cidade       String?
+  estado       String?
+  cep          String?
+  pastor_local String?
+  membros      Membro[]
+}
+
+model Usuario {
+  id       Int       @id @default(autoincrement())
+  nome     String
+  email    String    @unique
+  senha    String
+  role     Role
+  noticias Noticia[]
+  permissoes Permissao[]
+}
+
+model Noticia {
+  id              Int       @id @default(autoincrement())
+  titulo          String
+  imagem          String?
+  texto           String
+  autor_id        Int?
+  data_publicacao DateTime?
+  aprovado        Boolean   @default(false)
+  autor           Usuario?  @relation(fields: [autor_id], references: [id])
+}
+
+model Agenda {
+  id          Int      @id @default(autoincrement())
+  nome_evento String
+  data_evento DateTime
+}
+
+model Membro {
+  id                    Int       @id @default(autoincrement())
+  nome_completo         String
+  funcao                Funcao
+  data_nascimento       DateTime?
+  data_batismo          DateTime?
+  data_ingresso_ministerio DateTime?
+  cidade                String?
+  estado                String?
+  telefone              String?
+  estado_civil          String?
+  naturalidade          String?
+  rg                    String?
+  sexo                  Sexo?
+  ativo                 Boolean   @default(true)
+  igreja_id             Int?
+  igreja                Igreja?   @relation(fields: [igreja_id], references: [id])
+}
+
+model Permissao {
+  id         Int         @id @default(autoincrement())
+  usuario_id Int
+  permissao  PermissaoTipo
+  usuario    Usuario     @relation(fields: [usuario_id], references: [id])
+}
+
+enum Role {
+  Master
+  Escritor
+  Tesoureiro
+}
+
+enum Funcao {
+  Pastor
+  Evangelista
+  Presbítero
+  Diácono
+  Missionário
+  Auxiliar
+  Membro
+}
+
+enum Sexo {
+  M
+  F
+}
+
+enum PermissaoTipo {
+  noticias_criar
+  noticias_aprovar
+  agenda_inserir
+  membros_crud
+  emitir_documentos
+  cadastrar_documentos
+}
